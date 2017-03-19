@@ -14,17 +14,20 @@ adj_1 = pandas.read_csv('Adj_1.csv', sep=',', header=None)
 gene_exp_1_corr = gene_exp_1.corr('pearson')
 
 gene_exp_1_corr_matrix = gene_exp_1_corr.as_matrix()
-# Get upper triangle matrix since anything below diagonal is aduplicate.
+gene_exp_1_corr_matrix = gene_exp_1_corr_matrix * gene_exp_1_corr_matrix
+# Get upper triangle matrix since anything below diagonal is a duplicate.
 gene_exp_1_corr_matrix = np.triu(gene_exp_1_corr_matrix, 1)
 print(tabulate(gene_exp_1_corr_matrix, showindex=rowIDs, headers=rowIDs))
 
 # 3. Given the range of threshold (e.g., 0, 0.1, 0.2, 0.3, …, 0.9, 1), compare the adjacency
 # matrices between the network and the ground truth.
 for i in thresholds:
-    gene_exp_1_corr = gene_exp_1_corr.clip_lower(i)
+    gene_exp_1_corr = gene_exp_1_corr.clip_lower(i)  # Numbers lower than i are set to i
+    gene_exp_1_corr2 = gene_exp_1_corr.replace(i, 0)  # Numbers i replaced with 0
+    gene_exp_1_corr2 = gene_exp_1_corr2.as_matrix()
+    gene_exp_1_corr2 = gene_exp_1_corr2 * gene_exp_1_corr2
+    gene_exp_1_corr2 = np.triu(gene_exp_1_corr2, 1)  # Get upper triangle
     print("Threshold: {}".format(i))
-    gene_exp_1_corr2 = gene_exp_1_corr.replace(i, 0)
-    gene_exp_1_corr2 = np.triu(gene_exp_1_corr2.as_matrix(), 1)
     print(tabulate(gene_exp_1_corr2, showindex=rowIDs, headers=rowIDs))
 
 # 4. Compute a confusion matrix for each threshold
