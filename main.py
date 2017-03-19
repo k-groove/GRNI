@@ -37,7 +37,8 @@ for i in thresholds:
     print(tabulate(gene_exp_1_corr_threshold_matrix, showindex=rowIDs, headers=rowIDs))
     print("")
 # 4. Compute a confusion matrix for each threshold
-
+roc_x = []
+roc_y = []
 for i in thresholds:
     true_pos = 0
     true_neg = 0
@@ -59,11 +60,17 @@ for i in thresholds:
     print("Confusion matrix Threshold: {}".format(i))
     print(tabulate([[true_pos, false_neg], [false_pos, true_neg]], showindex=['true', 'false'],
                    headers=['true', 'false']))
-    print("")
     # 5. Compute TPR and FPR for each threshold
     tpr = true_pos / (true_pos + false_neg)
     fpr = false_pos / (false_pos + true_neg)
     print("TPR: {}".format(tpr))
     print("FPR: {}".format(fpr))
-
+    print("")
+    roc_x.extend([fpr])
+    roc_y.extend([tpr])
 # 6. Make a ROC plot. E.g., see Fig. 2
+plt.plot(roc_x, roc_y, '-o', ms=3)
+plt.axis([-0.1, 1.1, -0.1, 1.1])
+plt.ylabel("True positive rate")
+plt.xlabel("False positive rate")
+plt.show()
