@@ -1,32 +1,38 @@
 from pandas import *
 from tabulate import tabulate
 import numpy as np
+import matplotlib.pyplot as plt
+
+plt.style.use('ggplot')
 
 rowIDs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 thresholds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 # 1. Load the gene expression data (Gene_expression_1.csv) and the ground truth adjacency
 # matrix (Adj_1.csv).
 gene_exp_1 = pandas.read_csv('Gene_expression_1.csv')
-adj_1 = pandas.read_csv('Adj_1.csv', sep=',', header=None)
+ground_truth_adj = pandas.read_csv('Adj_1.csv', sep=',', header=None)
 
 # 2. Compute pairwise correlation matrix, and show the matrix. see Fig. 1
-# print(tabulate(adj_1, showindex=rowIDs, headers=rowIDs))
-gene_exp_1_corr = gene_exp_1.corr('pearson')
 
+gene_exp_1_corr = gene_exp_1.corr('pearson')
+plt.show()
+gene_exp_1_corr = gene_exp_1_corr.multiply(gene_exp_1_corr)
 gene_exp_1_corr_matrix = gene_exp_1_corr.as_matrix()
-gene_exp_1_corr_matrix = gene_exp_1_corr_matrix * gene_exp_1_corr_matrix
 # Get upper triangle matrix since anything below diagonal is a duplicate.
 gene_exp_1_corr_matrix = np.triu(gene_exp_1_corr_matrix, 1)
 print(tabulate(gene_exp_1_corr_matrix, showindex=rowIDs, headers=rowIDs))
 
 # 3. Given the range of threshold (e.g., 0, 0.1, 0.2, 0.3, …, 0.9, 1), compare the adjacency
 # matrices between the network and the ground truth.
+
+ground_truth_adj = np.triu(ground_truth_adj, 1)  # Get upper triangle
+print(tabulate(ground_truth_adj, showindex=rowIDs, headers=rowIDs))
+
 for i in thresholds:
     gene_exp_1_corr = gene_exp_1_corr.clip_lower(i)  # Numbers lower than i are set to i
     gene_exp_1_corr2 = gene_exp_1_corr.replace(i, 0)  # Numbers i replaced with 0
-    gene_exp_1_corr2 = gene_exp_1_corr2.as_matrix()
-    gene_exp_1_corr2 = gene_exp_1_corr2 * gene_exp_1_corr2
-    gene_exp_1_corr2 = np.triu(gene_exp_1_corr2, 1)  # Get upper triangle
+    gene_exp_1_corr2 = np.triu(gene_exp_1_corr2.as_matrix(), 1)  # Get upper triangle
+
     print("Threshold: {}".format(i))
     print(tabulate(gene_exp_1_corr2, showindex=rowIDs, headers=rowIDs))
 
