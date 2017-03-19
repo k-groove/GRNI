@@ -56,11 +56,14 @@ for i in thresholds:
                 true_neg += 1
             if ground_truth_adj[x][y] == 0 and gene_exp_1_corr_threshold_matrix[x][y] > 0.0:
                 false_pos += 1
-    print("Threshold: {}".format(i))
+    print("Confusion matrix Threshold: {}".format(i))
     print(tabulate([[true_pos, false_neg], [false_pos, true_neg]], showindex=['true', 'false'],
                    headers=['true', 'false']))
     print("")
-# 5. Compute TPR and FPR for each threshold
-
+    # 5. Compute TPR and FPR for each threshold
+    tpr = true_pos / (true_pos + false_neg)
+    fpr = false_pos / (false_pos + true_neg)
+    print("TPR: {}".format(tpr))
+    print("FPR: {}".format(fpr))
 
 # 6. Make a ROC plot. E.g., see Fig. 2
