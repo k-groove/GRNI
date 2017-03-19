@@ -26,23 +26,40 @@ print(tabulate(gene_exp_1_corr_matrix, showindex=rowIDs, headers=rowIDs))
 # matrices between the network and the ground truth.
 
 ground_truth_adj = np.triu(ground_truth_adj, 1)  # Get upper triangle
+print("Ground Truth")
 print(tabulate(ground_truth_adj, showindex=rowIDs, headers=rowIDs))
-
 for i in thresholds:
-    gene_exp_1_corr = gene_exp_1_corr.clip_lower(i)  # Numbers lower than i are set to i
-    gene_exp_1_corr2 = gene_exp_1_corr.replace(i, 0)  # Numbers i replaced with 0
-    gene_exp_1_corr2 = np.triu(gene_exp_1_corr2.as_matrix(), 1)  # Get upper triangle
+    temp1 = gene_exp_1_corr.clip_lower(i)  # Numbers < i are set to i
+    gene_exp_1_corr_threshold = temp1.replace(i, 0)  # Number = i are replaced with 0
+    gene_exp_1_corr_threshold_matrix = np.triu(gene_exp_1_corr_threshold.as_matrix(), 1)  # Get upper triangle
 
     print("Threshold: {}".format(i))
-    print(tabulate(gene_exp_1_corr2, showindex=rowIDs, headers=rowIDs))
-
+    print(tabulate(gene_exp_1_corr_threshold_matrix, showindex=rowIDs, headers=rowIDs))
+    print("")
 # 4. Compute a confusion matrix for each threshold
-# for i in threshold:
-#     y_actu = Series(corr.clip_lower(j), name='Actual')
-#     y_pred = Series(adj_1, name='Predicted')
-#     corr_confusion = crosstab(y_actu, y_pred)
-#     print(corr_confusion)
 
+for i in thresholds:
+    true_pos = 0
+    true_neg = 0
+    false_pos = 0
+    false_neg = 0
+    temp2 = gene_exp_1_corr.clip_lower(i)  # Numbers < i are set to i
+    gene_exp_1_corr_threshold = temp2.replace(i, 0)  # Number = i are replaced with 0
+    gene_exp_1_corr_threshold_matrix = np.triu(gene_exp_1_corr_threshold.as_matrix(), 1)  # Get upper triangle
+    for x in range(0, 10):
+        for y in range(0, 10):
+            if ground_truth_adj[x][y] > 0 and gene_exp_1_corr_threshold_matrix[x][y] > 0.0:
+                true_pos += 1
+            if ground_truth_adj[x][y] > 0 and gene_exp_1_corr_threshold_matrix[x][y] == 0.0:
+                false_neg += 1
+            if ground_truth_adj[x][y] == 0 and gene_exp_1_corr_threshold_matrix[x][y] == 0.0:
+                true_neg += 1
+            if ground_truth_adj[x][y] == 0 and gene_exp_1_corr_threshold_matrix[x][y] > 0.0:
+                false_pos += 1
+    print("Threshold: {}".format(i))
+    print(tabulate([[true_pos, false_neg], [false_pos, true_neg]], showindex=['true', 'false'],
+                   headers=['true', 'false']))
+    print("")
 # 5. Compute TPR and FPR for each threshold
 
 
